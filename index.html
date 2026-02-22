@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 10px; background: #121212; color: white; margin: 0; overflow-x: hidden; }
+    .container { max-width: 450px; margin: auto; }
+    .menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 20px; }
+    .btn-linha { padding: 22px; font-size: 18px; font-weight: bold; border-radius: 12px; border: none; background: #ffc107; color: #000; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); }
+    #tela-calculadora { display: none; padding: 5px; }
+    .grid-tarifas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .btn-tarifa { padding: 12px 5px; border-radius: 8px; border: 2px solid #333; background: #333; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65px; }
+    .btn-tarifa b { font-size: 13px; color: #ffc107; margin-bottom: 4px; text-transform: uppercase; }
+    .btn-tarifa span { font-size: 18px; font-weight: bold; }
+    #modal-qtd { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 100; justify-content: center; align-items: center; }
+    .modal-content { background: #222; padding: 20px; border-radius: 15px; width: 85%; border: 2px solid #ffc107; }
+    .grid-qtd { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
+    .btn-qtd-num { padding: 20px; font-size: 24px; font-weight: bold; border-radius: 10px; border: none; background: #333; color: white; }
+    .btn-cancelar { grid-column: span 3; background: #dc3545; padding: 15px; margin-top: 10px; border-radius: 10px; color: white; border: none; font-weight: bold; }
+    .info-total-container { display: flex; gap: 5px; align-items: stretch; margin: 10px 0; }
+    .info-total { flex: 4; background: #333; padding: 15px; border-radius: 8px; font-size: 22px; color: #ffc107; font-weight: bold; border: 1px dashed #ffc107; }
+    .btn-limpar { flex: 1; background: #dc3545; border: none; border-radius: 8px; color: white; font-size: 24px; font-weight: bold; }
+    input { width: 100%; padding: 15px; font-size: 35px; border-radius: 10px; border: none; text-align: center; background: #fff; color: #000; box-sizing: border-box; font-weight: bold; margin-bottom: 10px; }
+    .resultado-box { background: #28a745; padding: 15px; border-radius: 15px; min-height: 95px; }
+    #resultado { font-size: 55px; font-weight: bold; margin-top: 5px; }
+    .controles-navegacao { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .btn-nav { background: #444; border: none; color: white; padding: 12px; border-radius: 5px; font-weight: bold; font-size: 12px; }
+    .btn-outra { background: #007bff; color: white; }
+    .label { font-size: 11px; opacity: 0.8; text-transform: uppercase; margin-bottom: 4px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div id="tela-menu">
+      <h2 style="margin-top: 20px; color: #ffc107;">🚌 Troco Rodoviário</h2>
+      <div class="menu-grid">
+        <button class="btn-linha" onclick="iniciarCalc('910 - VOLTA')">910 - VOLTA</button>
+        <button class="btn-linha" onclick="iniciarCalc('910 - IDA')">910 - IDA</button>
+        <button class="btn-linha" onclick="iniciarCalc('921 - VOLTA')">921 - VOLTA</button>
+        <button class="btn-linha" onclick="iniciarCalc('921 - IDA')">921 - IDA</button>
+      </div>
+    </div>
+
+    <div id="tela-calculadora">
+      <div class="controles-navegacao">
+        <button class="btn-nav" onclick="finalizarAtendimento()">⬅ FINALIZAR</button>
+        <button class="btn-nav btn-outra" onclick="voltarParaMenu()">+ OUTRA LINHA</button>
+      </div>
+      <h3 id="titulo-linha" style="margin: 0 0 10px 0; color: #ffc107; font-size: 16px;"></h3>
+      <div class="grid-tarifas" id="container-botoes"></div>
+      <div class="info-total-container">
+        <div id="info-total" class="info-total">TOTAL: R$ 0,00</div>
+        <button class="btn-limpar" onclick="limparTudo()">X</button>
+      </div>
+      <div class="label">Dinheiro Recebido:</div>
+      <input type="number" id="pago" placeholder="R$ 0,00" oninput="calcular()" inputmode="decimal">
+      <div class="resultado-box">
+        <div class="label" style="color: white;">Troco a entregar:</div>
+        <div id="resultado">R$ 0,00</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-qtd">
+    <div class="modal-content">
+      <h3 id="nome-trecho-modal" style="margin: 0; color: #ffc107;"></h3>
+      <p>Quantas passagens?</p>
+      <div class="grid-qtd">
+        <button class="btn-qtd-num" onclick="confirmarSoma(1)">1</button>
+        <button class="btn-qtd-num" onclick="confirmarSoma(2)">2</button>
+        <button class="btn-qtd-num" onclick="confirmarSoma(3)">3</button>
+        <button class="btn-qtd-num" onclick="confirmarSoma(4)">4</button>
+        <button class="btn-qtd-num" onclick="confirmarSoma(5)">5</button>
+        <button class="btn-qtd-num" onclick="confirmarSoma(6)">6</button>
+        <button class="btn-cancelar" onclick="fecharModal()">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let totalAcumulado = 0;
+    let valorPendente = 0;
+
+    const dadosLinhas = {
+      '910 - VOLTA': [
+        { nome: "Per x STS", valor: 35.80 }, { nome: "Per x SVS", valor: 31.05 },
+        { nome: "Per x PG", valor: 23.25 }, { nome: "Per x Mon", valor: 18.80 },
+        { nome: "Per x Ita", valor: 14.20 }, { nome: "Ita x Mon", valor: 11.00 },
+        { nome: "Mon x STS", valor: 16.60 }, { nome: "Mon x SVS", valor: 13.90 },
+        { nome: "Mon x PG", valor: 9.90 }, { nome: "PG x PG", valor: 9.90 },
+        { nome: "PG x STS", valor: 11.40 }
+      ],
+      '910 - IDA': [
+        { nome: "Per x STS", valor: 35.80 }, { nome: "Per x SVS", valor: 31.05 },
+        { nome: "Per x PG", valor: 23.25 }, { nome: "Per x Mon", valor: 18.80 },
+        { nome: "Per x Ita", valor: 14.20 }, { nome: "Ita x Mon", valor: 11.00 }
+      ],
+      '921 - IDA': [
+        { nome: "Itax STS", valor: 24.10 }, { nome: "Itax SVS", valor: 18.95 },
+        { nome: "Itax PG", valor: 17.60 }, { nome: "Itax Mon", valor: 9.80 },
+        { nome: "Mon x STS", valor: 16.60 }, { nome: "Mon x SVS", valor: 13.90 },
+        { nome: "Mon x PG", valor: 9.90 }, { nome: "PG x PG", valor: 9.90 },
+        { nome: "PG x STS", valor: 11.40 }
+      ],
+      '921 - VOLTA': [
+        { nome: "Itax STS", valor: 24.10 }, { nome: "Itax SVS", valor: 18.95 },
+        { nome: "Itax PG", valor: 17.60 }, { nome: "Itax Mon", valor: 9.80 },
+        { nome: "Mon x STS", valor: 16.60 }, { nome: "Mon x SVS", valor: 13.90 },
+        { nome: "Mon x PG", valor: 9.90 }, { nome: "PG x PG", valor: 9.90 },
+        { nome: "PG x STS", valor: 11.40 }
+      ]
+    };
+
+    function iniciarCalc(linha) {
+      document.getElementById('tela-menu').style.display = 'none';
+      document.getElementById('tela-calculadora').style.display = 'block';
+      document.getElementById('titulo-linha').innerText = "Linha: " + linha;
+      const container = document.getElementById('container-botoes');
+      container.innerHTML = '';
+      dadosLinhas[linha].forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-tarifa';
+        btn.innerHTML = `<b>${item.nome}</b><span>R$ ${item.valor.toFixed(2).replace('.', ',')}</span>`;
+        btn.onclick = function() { abrirModal(item.nome, item.valor); };
+        container.appendChild(btn);
+      });
+    }
+
+    function abrirModal(nome, valor) {
+      valorPendente = valor;
+      document.getElementById('nome-trecho-modal').innerText = nome;
+      document.getElementById('modal-qtd').style.display = 'flex';
+    }
+
+    function confirmarSoma(qtd) {
+      totalAcumulado += (valorPendente * qtd);
+      fecharModal();
+      atualizarDisplay();
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-qtd').style.display = 'none';
+      valorPendente = 0;
+    }
+
+    function atualizarDisplay() {
+      document.getElementById('info-total').innerText = "TOTAL: R$ " + totalAcumulado.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+      calcular();
+    }
+
+    function calcular() {
+      const pago = parseFloat(document.getElementById('pago').value) || 0;
+      const resElement = document.getElementById('resultado');
+      if (pago > 0 && totalAcumulado > 0) {
+        const troco = pago - totalAcumulado;
+        resElement.innerText = troco < 0 ? "FALTA $$$" : "R$ " + troco.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+        resElement.style.color = troco < 0 ? "#ff4444" : "white";
+      } else {
+        resElement.innerText = "R$ 0,00";
+        resElement.style.color = "white";
+      }
+    }
+
+    function voltarParaMenu() {
+      document.getElementById('tela-menu').style.display = 'block';
+      document.getElementById('tela-calculadora').style.display = 'none';
+    }
+
+    function finalizarAtendimento() {
+      if (confirm("Zerar conta e voltar ao início?")) {
+        limparTudo();
+        document.getElementById('tela-menu').style.display = 'block';
+        document.getElementById('tela-calculadora').style.display = 'none';
+      }
+    }
+
+    function limparTudo() {
+      totalAcumulado = 0;
+      document.getElementById('pago').value = '';
+      atualizarDisplay();
+    }
+  </script>
+</body>
+</html>
