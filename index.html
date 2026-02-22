@@ -83,20 +83,18 @@
     let totalAcumulado = 0;
     let valorPendente = 0;
 
+    const tarifas910 = [
+      { nome: "Per x STS", valor: 35.80 }, { nome: "Per x SVS", valor: 31.05 },
+      { nome: "Per x PG", valor: 23.25 }, { nome: "Per x Mon", valor: 18.80 },
+      { nome: "Per x Ita", valor: 14.20 }, { nome: "Ita x Mon", valor: 11.00 },
+      { nome: "Mon x STS", valor: 16.60 }, { nome: "Mon x SVS", valor: 13.90 },
+      { nome: "Mon x PG", valor: 9.90 }, { nome: "PG x PG", valor: 9.90 },
+      { nome: "PG x STS", valor: 11.40 }
+    ];
+
     const dadosLinhas = {
-      '910 - VOLTA': [
-        { nome: "Per x STS", valor: 35.80 }, { nome: "Per x SVS", valor: 31.05 },
-        { nome: "Per x PG", valor: 23.25 }, { nome: "Per x Mon", valor: 18.80 },
-        { nome: "Per x Ita", valor: 14.20 }, { nome: "Ita x Mon", valor: 11.00 },
-        { nome: "Mon x STS", valor: 16.60 }, { nome: "Mon x SVS", valor: 13.90 },
-        { nome: "Mon x PG", valor: 9.90 }, { nome: "PG x PG", valor: 9.90 },
-        { nome: "PG x STS", valor: 11.40 }
-      ],
-      '910 - IDA': [
-        { nome: "Per x STS", valor: 35.80 }, { nome: "Per x SVS", valor: 31.05 },
-        { nome: "Per x PG", valor: 23.25 }, { nome: "Per x Mon", valor: 18.80 },
-        { nome: "Per x Ita", valor: 14.20 }, { nome: "Ita x Mon", valor: 11.00 }
-      ],
+      '910 - VOLTA': tarifas910,
+      '910 - IDA': tarifas910,
       '921 - IDA': [
         { nome: "Itax STS", valor: 24.10 }, { nome: "Itax SVS", valor: 18.95 },
         { nome: "Itax PG", valor: 17.60 }, { nome: "Itax Mon", valor: 9.80 },
